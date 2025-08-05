@@ -1,22 +1,21 @@
 import json
 import os
-from pathlib import Path
 from typing import Dict, Any, List
-import psycopg2
-import requests
-from psycopg2.extras import RealDictCursor
-import sqlalchemy
-from sqlalchemy import create_engine, text
-import pandas as pd
-from urllib3.exceptions import InsecureRequestWarning
 
+import pandas as pd
+import requests
+from dotenv import load_dotenv
 from prefect import flow, task, get_run_logger
 from prefect.task_runners import ConcurrentTaskRunner
+from sqlalchemy import create_engine, text
+from urllib3.exceptions import InsecureRequestWarning
 
-from canvas import endpoints
 from canvas import APIClient
+from canvas import endpoints
 
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+
+load_dotenv()
 
 CONNECTION_INFO = {
     "dataSource": {
@@ -803,7 +802,6 @@ def github_deploy():
         Not in use now
     """
     from prefect.runner.storage import GitRepository
-    from prefect_github import GitHubCredentials
     from prefect_github import GitHubCredentials
 
     github_credentials_block = GitHubCredentials(token=os.getenv("GITHUB_TOKEN"))
