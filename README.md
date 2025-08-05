@@ -39,12 +39,19 @@ prefect deploy canvas/flow.py:canvas_data_extraction_flow -n "canvas-data-extrac
 ```
 
 
-### Deploy to Cloud
+## Monitor the Flow using Prefect Cloud UI
+
+### Login to Prefect Cloud
 
 ```bash
-prefect worker start --pool "canvas-pool"
+prefect cloud login
+prefect profile use cloud-profile
 ```
 
+### Run the Flow
 ```
-prefect deploy canvas_flow.py:canvas_data_extraction_flow --name "canvas-extraction" --pool "default-agent-pool" --path .
+python canvas_flow.py
 ```
+
+### View the Flow Run
+- Go to the Prefect Cloud UI: https://cloud.prefect.io/

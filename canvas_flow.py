@@ -797,6 +797,28 @@ def canvas_data_extraction_flow(connection_info: Dict[str, Any] = CONNECTION_INF
     return save_results
 
 
+def github_deploy():
+    """
+        Deploy the flow to Prefect Cloud using GitHub as the source repository.
+        Not in use now
+    """
+    from prefect.runner.storage import GitRepository
+    from prefect_github import GitHubCredentials
+    from prefect_github import GitHubCredentials
+
+    github_credentials_block = GitHubCredentials(token=os.getenv("GITHUB_TOKEN"))
+    github_credentials_block.save(name="github-credentials-block")
+
+    source = GitRepository(
+        url="https://github.com/Andrew-Beard/evisions-prefect",
+        credentials=GitHubCredentials.load("github-credentials-block")
+    )
+    flow.from_source(source=source, entrypoint="canvas_flow.py:canvas_data_extraction_flow").deploy(
+        name="canvas_data_extraction_flow",
+        work_pool_name="canvas-pool",
+    )
+
+
 if __name__ == "__main__":
     result = canvas_data_extraction_flow()
 
@@ -816,11 +838,3 @@ if __name__ == "__main__":
 
     print(f"\nTotal tables updated: {len(result)}")
     print("=" * 60)
-
-# if __name__ == "__main__":
-#     canvas_data_extraction_flow.deploy(
-#         name="canvas_data_extraction_flow",
-#         work_pool_name="canvas-pool",
-#         image="prefecthq/prefect:3-python3.12",
-#         push=False
-#     )
