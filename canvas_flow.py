@@ -715,7 +715,7 @@ def save_discussion_entries_to_db(fetch_result: Dict[str, Any], load_mode: str =
     description="Extract data from Canvas API endpoints in parallel and save to PostgreSQL database",
     task_runner=ConcurrentTaskRunner()
 )
-def canvas_data_extraction_flow(connection_info: Dict[str, Any] = CONNECTION_INFO, load_mode: str = "append") -> List[
+def canvas_data_extraction_flow(connection_info: Dict[str, Any] = CONNECTION_INFO, load_mode: str = "replace") -> List[
     Dict[str, Any]]:
     logger = get_run_logger()
     logger.info("Starting Canvas data extraction flow")
@@ -805,7 +805,7 @@ def github_deploy():
     from prefect_github import GitHubCredentials
 
     github_credentials_block = GitHubCredentials(token=os.getenv("GITHUB_TOKEN"))
-    github_credentials_block.save(name="github-credentials-block")
+    github_credentials_block.save(name="github-credentials-block", overwrite=True)
 
     source = GitRepository(
         url="https://github.com/Andrew-Beard/evisions-prefect",
@@ -814,25 +814,44 @@ def github_deploy():
     flow.from_source(source=source, entrypoint="canvas_flow.py:canvas_data_extraction_flow").deploy(
         name="canvas_data_extraction_flow",
         work_pool_name="canvas-pool",
+        job_variables={
+            "pip_packages": [
+                "pandas>=1.5.0",
+                "requests>=2.26.0",
+                "python-dotenv>=0.19.0",
+                "sqlalchemy>=1.4.0",
+                "psycopg2-binary>=2.9.1"
+            ],
+            "env": {
+                "CANVAS_ACCOUNT_ID": os.getenv("CANVAS_ACCOUNT_ID", "1"),
+                "CANVAS_API_TOKEN": os.getenv("CANVAS_API_TOKEN"),
+                "POSTGRES_HOST": os.getenv("POSTGRES_HOST", "localhost"),
+                "POSTGRES_PORT": os.getenv("POSTGRES_PORT", "5432"),
+                "POSTGRES_DB": os.getenv("POSTGRES_DB", "postgres"),
+                "POSTGRES_USER": os.getenv("POSTGRES_USER", "postgres"),
+                "POSTGRES_PASSWORD": os.getenv("POSTGRES_PASSWORD", "password")
+            }
+        }
     )
 
 
 if __name__ == "__main__":
-    result = canvas_data_extraction_flow()
-
-    print("\n" + "=" * 60)
-    print("CANVAS DATA EXTRACTION SUMMARY")
-    print("=" * 60)
-
-    for save_result in result:
-        endpoint = save_result["endpoint_name"]
-        records = save_result["record_count"]
-        table_name = save_result.get("table_name", "N/A")
-        status = save_result["status"]
-        load_mode = save_result.get("load_mode", "N/A")
-
-        status_icon = "✅" if status == "saved" else "⚠️"
-        print(f"{status_icon} {endpoint}: {records} records → {table_name} ({load_mode})")
-
-    print(f"\nTotal tables updated: {len(result)}")
-    print("=" * 60)
+    github_deploy()
+    # result = canvas_data_extraction_flow()
+    #
+    # print("\n" + "=" * 60)
+    # print("CANVAS DATA EXTRACTION SUMMARY")
+    # print("=" * 60)
+    #
+    # for save_result in result:
+    #     endpoint = save_result["endpoint_name"]
+    #     records = save_result["record_count"]
+    #     table_name = save_result.get("table_name", "N/A")
+    #     status = save_result["status"]
+    #     load_mode = save_result.get("load_mode", "N/A")
+    #
+    #     status_icon = "✅" if status == "saved" else "⚠️"
+    #     print(f"{status_icon} {endpoint}: {records} records → {table_name} ({load_mode})")
+    #
+    # print(f"\nTotal tables updated: {len(result)}")
+    # print("=" * 60)

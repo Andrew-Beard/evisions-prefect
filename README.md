@@ -1,6 +1,6 @@
-# Moodle Learning Activities ETL with Prefect
+# Canvas Data Extraction with Prefect
 
-This project runs multiple learning activity queries (Assignment, Quiz, H5P, etc.) from a Moodle database in parallel using **Prefect**.
+This project runs a Prefect flow to extract data from a Canvas LMS instance and store it in a PostgreSQL database. The flow is designed to be run on a Prefect server or Prefect Cloud, allowing for easy scheduling and monitoring.
 
 ## Requirements
 
@@ -39,7 +39,7 @@ prefect deploy canvas/flow.py:canvas_data_extraction_flow -n "canvas-data-extrac
 ```
 
 
-## Monitor the Flow using Prefect Cloud UI
+## Deploy to Prefect Cloud
 
 ### Login to Prefect Cloud
 
@@ -48,7 +48,12 @@ prefect cloud login
 prefect profile use cloud-profile
 ```
 
-### Run the Flow
+### Create a prefect:managed work pool
+```bash
+prefect work-pool create canvas-pool --type prefect:managed
+```
+
+### Deploy the flow
 ```
 python canvas_flow.py
 ```
