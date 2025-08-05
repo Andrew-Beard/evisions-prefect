@@ -1,0 +1,20 @@
+prefect
+prefect-cloud
+
+# Database dependencies
+psycopg2-binary>=2.9.0
+sqlalchemy>=2.0.0
+pandas>=2.0.0
+
+# HTTP requests (if needed by canvas module)
+requests>=2.28.0
+httpx>=0.24.0
+
+# JSON and data handling
+ujson>=5.7.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Logging and monitoring
+structlog>=23.0.0
